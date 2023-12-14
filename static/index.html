@@ -1,0 +1,49 @@
+<html>
+<header>
+	<title>图片管理</title>
+</header>
+<body>
+	<input type='file' name='upload' accept='image/jpeg, image/png, image/gif, image/avif' multiple>
+	<input type='submit' onclick='uploadFile()' value='Upload file' />
+	<div>
+		<br/>
+		result:
+		<div id='result'></div>
+	</div>
+</form>
+<script>
+	function uploadFile() {
+		const resultDom = document.getElementById('result');
+		const formData = new FormData();
+		const files = document.getElementsByName('upload')[0].files;
+
+		resultDom.innerHTML = '';
+
+		for (let i = 0; i < files.length; i ++) {
+			formData.append('files', files[i]);
+		}
+		let xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					const result = JSON.parse(xhr.response);
+					alert(result.message);
+					result.data.forEach(item => {
+						const url = `${location.origin}/imgs/${item.fileId}.300.0.50.webp`;
+						const img = document.createElement('img');
+						resultDom.append(`url=${url}; id=${item.fileId}`);
+						img.src = `${url}`;
+						resultDom.appendChild(img);
+						resultDom.appendChild(document.createElement('br'));
+					})
+				} else {
+					alert('上传失败');
+				}
+			}
+		};
+		xhr.open('post', '/api/upload');
+		xhr.send(formData);
+	}
+</script>
+</body>
+</html>
